@@ -1,0 +1,144 @@
+{
+  "existingNode": {
+    "Student": {
+      "osid": "1-2343f-4546fg",
+      "identityDetails": {
+        "name": "Vamsi K"
+      },
+      "education": [
+        {
+          "osid": "1-4534gd-5654er",
+          "institute": "OMG U",
+          "fromYear": "2232"
+        },
+        {
+          "osid": "1-4534gd-5654er12",
+          "institute": "OMG UG",
+          "fromYear": "2202",
+          "toYear": "2212"
+        }
+      ]
+    }
+  },
+  "scenarios": [
+    {
+      "newPropertyNode": "did:aadhar:12433252",
+      "propertyPath": "identityDetails/nationalIdentifier",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K",
+            "nationalIdentifier": [
+              "did:aadhar:12433252"
+            ]
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "OMG U",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2212"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "newPropertyNode": {
+        "institute": "XYZ",
+        "fromYear": "2121"
+      },
+      "propertyPath": "education",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K"
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "OMG U",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2212"
+            },
+            {
+              "institute": "XYZ",
+              "fromYear": "2121"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "newPropertyNode": "2144",
+      "propertyPath": "education/1-4534gd-5654er12/toYear",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K"
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "OMG U",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2144"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "newPropertyNode": {
+        "name": "RockOn",
+        "est": "1231"
+      },
+      "propertyPath": "musicBand",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K"
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "OMG U",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2212"
+            }
+          ],
+          "musicBand": [
+            {
+              "name": "RockOn",
+              "est": "1231"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

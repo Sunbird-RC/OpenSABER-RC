@@ -343,13 +343,13 @@ public class RegistryHelper {
         JsonNode propertyParentNode = updateNode.get(entityName).at(entityPropertyURI.get().getJsonPointer().head());
         String propertyName = entityPropertyURI.get().getJsonPointer().last().getMatchingProperty();
 
-        if (propertyParentNode.isObject()) {
-            ((ObjectNode)propertyParentNode).set(propertyName, inputJson);
-        } else if (existingPropertyNode.isObject()){
-            inputJson.fields().forEachRemaining(f -> ((ObjectNode)existingPropertyNode).set(f.getKey(), f.getValue()));
+        if (existingPropertyNode.isObject()) {
+            inputJson.fields().forEachRemaining(f -> ((ObjectNode) existingPropertyNode).set(f.getKey(), f.getValue()));
+        } else if (propertyParentNode.isObject()) {
+            ((ObjectNode) propertyParentNode).set(propertyName, inputJson);
         } else {
             int propertyIndex = Integer.parseInt(propertyName);
-            ((ArrayNode)propertyParentNode).set(propertyIndex, inputJson);
+            ((ArrayNode) propertyParentNode).set(propertyIndex, inputJson);
         }
         updateEntityAndState(existingNode, updateNode, "");
     }

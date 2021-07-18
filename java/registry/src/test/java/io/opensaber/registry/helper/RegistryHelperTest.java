@@ -2,8 +2,8 @@ package io.opensaber.registry.helper;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.opensaber.registry.middleware.util.Constants;
 import io.opensaber.registry.model.DBConnectionInfoMgr;
 import io.opensaber.registry.service.DecryptionHelper;
@@ -12,23 +12,22 @@ import io.opensaber.registry.service.ISearchService;
 import io.opensaber.registry.service.RegistryService;
 import io.opensaber.registry.sink.shard.ShardManager;
 import io.opensaber.registry.util.ViewTemplateManager;
-
+import io.opensaber.validators.IValidate;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.io.File;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles(Constants.TEST_ENVIRONMENT)
@@ -45,9 +44,6 @@ public class RegistryHelperTest {
 	private ObjectMapper objectMapper;
 
 	@Mock
-	private ObjectMapper objectMapperMock;
-
-	@Mock
 	private ISearchService searchService;
 	
 	@Mock
@@ -57,25 +53,36 @@ public class RegistryHelperTest {
     private ShardManager shardManager;
 
 	@Mock
-    RegistryService registryService;
+	RegistryService registryService;
 
 	@Mock
-    IReadService readService;
+	IReadService readService;
 
-    @Mock
-    private DBConnectionInfoMgr dbConnectionInfoMgr;
+	@Mock
+	private DBConnectionInfoMgr dbConnectionInfoMgr;
 
-    @Mock
-    private DecryptionHelper decryptionHelper;
+	@Mock
+	private DecryptionHelper decryptionHelper;
+
+	@Mock
+	private IValidate validationService;
+
+	@Mock
+	private EntityStateHelper entityStateHelper;
+
+	@Captor
+	private ArgumentCaptor<String> stringArgumentCaptor;
 
 	@Before
     public void initMocks(){
 		ReflectionTestUtils.setField(registryHelper, "auditSuffix", "Audit");
 		ReflectionTestUtils.setField(registryHelper, "auditSuffixSeparator", "_");
-        MockitoAnnotations.initMocks(this);
+		ReflectionTestUtils.setField(registryHelper, "uuidPropertyName", "osid");
+		ReflectionTestUtils.setField(registryHelper, "objectMapper", objectMapper);
+		MockitoAnnotations.initMocks(this);
 		registryHelper.uuidPropertyName = "osid";
 	}
-	
+
 	@Test
 	public void getAuditLogTest() throws Exception {
 
@@ -91,11 +98,10 @@ public class RegistryHelperTest {
 		JsonNode resultNode = null;
 		jsonNode = objectMapper.readTree(inputJson);
 		resultNode = objectMapper.readTree(result);
-		
-        Mockito.when(objectMapperMock.createArrayNode()).thenReturn(objectMapper.createArrayNode());
+
 		Mockito.when(searchService.search(ArgumentMatchers.any())).thenReturn(resultNode);
 		Mockito.when(viewTemplateManager.getViewTemplate(ArgumentMatchers.any())).thenReturn(null);
-		
+
 		JsonNode node = registryHelper.getAuditLog(jsonNode);
 		Assert.assertEquals(jsonNode.get("Teacher").get("filters").get("recordId").get("eq"), node.get("Teacher_Audit").get(0).get("recordId"));
 	}
@@ -154,5 +160,84 @@ public class RegistryHelperTest {
 		Assert.assertEquals(propertyId, actualPropertyId);
 	}
 
+	@Test
+	public void addEntityPropertyTest() throws Exception {
+		JsonNode tests = objectMapper.readTree(new File("src/test/resources/addPropTests.json"));
+		JsonNode existingNode = tests.get("existingNode");
+
+		RegistryHelper registryHelperSpy = Mockito.spy(registryHelper);
+		Mockito.doReturn(existingNode).when(registryHelperSpy).readEntity(
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				ArgumentMatchers.eq(false),
+				ArgumentMatchers.isNull(),
+				ArgumentMatchers.eq(false)
+		);
+		Mockito.when(dbConnectionInfoMgr.getUuidPropertyName()).thenReturn("osid");
+		ArrayNode testScenarios = (ArrayNode) tests.get("scenarios");
+		for (JsonNode tc : testScenarios) {
+			registryHelperSpy.addEntityProperty(
+					"Student",
+					"123",
+					tc.get("propertyPath").asText(),
+					tc.get("newPropertyNode")
+			);
+
+		}
+
+		Mockito.verify(registryService, Mockito.times(testScenarios.size())).updateEntity(
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				stringArgumentCaptor.capture()
+		);
+		List<String> actualUpdatedNodes = stringArgumentCaptor.getAllValues();
+		for (int i = 0; i < actualUpdatedNodes.size(); i++) {
+			JsonNode actualNode = objectMapper.readTree(actualUpdatedNodes.get(i));
+			JsonNode expected = testScenarios.get(i).get("expected");
+			Assert.assertEquals(actualNode, expected);
+		}
+	}
+
+	@Test
+	public void updateEntityPropertyTests() throws Exception {
+		JsonNode tests = objectMapper.readTree(new File("src/test/resources/updatePropTests.json"));
+		JsonNode existingNode = tests.get("existingNode");
+
+		RegistryHelper registryHelperSpy = Mockito.spy(registryHelper);
+		Mockito.doReturn(existingNode).when(registryHelperSpy).readEntity(
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				ArgumentMatchers.eq(false),
+				ArgumentMatchers.isNull(),
+				ArgumentMatchers.eq(false)
+		);
+		Mockito.when(dbConnectionInfoMgr.getUuidPropertyName()).thenReturn("osid");
+		ArrayNode testScenarios = (ArrayNode) tests.get("scenarios");
+		for (JsonNode tc : testScenarios) {
+			registryHelperSpy.updateEntityProperty(
+					"Student",
+					"123",
+					tc.get("propertyPath").asText(),
+					tc.get("updatedPropNode")
+			);
+
+		}
+
+		Mockito.verify(registryService, Mockito.times(testScenarios.size())).updateEntity(
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				ArgumentMatchers.any(),
+				stringArgumentCaptor.capture()
+		);
+		List<String> actualUpdatedNodes = stringArgumentCaptor.getAllValues();
+		for (int i = 0; i < actualUpdatedNodes.size(); i++) {
+			JsonNode actualNode = objectMapper.readTree(actualUpdatedNodes.get(i));
+			JsonNode expected = testScenarios.get(i).get("expected");
+			Assert.assertEquals(actualNode, expected);
+		}
+	}
 
 }

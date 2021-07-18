@@ -1,0 +1,135 @@
+{
+  "existingNode": {
+    "Student": {
+      "osid": "1-2343f-4546fg",
+      "identityDetails": {
+        "name": "Vamsi K",
+        "nationalIdentifier": "did:aadhar:12433252",
+        "gender": "Male"
+      },
+      "education": [
+        {
+          "osid": "1-4534gd-5654er",
+          "institute": "OMG U",
+          "fromYear": "2232"
+        },
+        {
+          "osid": "1-4534gd-5654er12",
+          "institute": "OMG UG",
+          "fromYear": "2202",
+          "toYear": "2212"
+        }
+      ]
+    }
+  },
+  "scenarios": [
+    {
+      "updatedPropNode": {
+        "nationalIdentifier": "did:pan:anfe0987op"
+      },
+      "propertyPath": "identityDetails",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K",
+            "nationalIdentifier": "did:pan:anfe0987op",
+            "gender": "Male"
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "OMG U",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2212"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "updatedPropNode": "Other",
+      "propertyPath": "identityDetails/gender",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K",
+            "nationalIdentifier": "did:aadhar:12433252",
+            "gender": "Other"
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "OMG U",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2212"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "updatedPropNode": [
+        {
+          "institute": "XYZ"
+        }
+      ],
+      "propertyPath": "education",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K",
+            "nationalIdentifier": "did:aadhar:12433252",
+            "gender": "Male"
+          },
+          "education": [
+            {
+              "institute": "XYZ"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "updatedPropNode": {
+        "institute": "XYZ"
+      },
+      "propertyPath": "education/1-4534gd-5654er",
+      "expected": {
+        "Student": {
+          "osid": "1-2343f-4546fg",
+          "identityDetails": {
+            "name": "Vamsi K",
+            "nationalIdentifier": "did:aadhar:12433252",
+            "gender": "Male"
+          },
+          "education": [
+            {
+              "osid": "1-4534gd-5654er",
+              "institute": "XYZ",
+              "fromYear": "2232"
+            },
+            {
+              "osid": "1-4534gd-5654er12",
+              "institute": "OMG UG",
+              "fromYear": "2202",
+              "toYear": "2212"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
