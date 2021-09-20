@@ -1,58 +1,64 @@
 Feature: Registry api tests
   Background:
     * url baseurl
+    * string mobile = "0000000010"
+    * def password = "opensaber@123"
+    * def student = {"contactDetails": {"email": "peter@sahaj.ai","mobile": "#(mobile)"}}
+    * string registryUrl = "http://localhost:8081"
+    * string authUrl = "http://localhost:9990"
 
   Scenario: health check
     Given path 'health'
     When method get
     Then status 200
 
-#  Scenario: create a teacher entity
-#    * def teacher =
-#    """
-#    {}
-#    """
-#    Given path 'api/v1/Teacher'
-#    And request teacher
-#    When method post
-#    Then status 400
-#  Scenario: get all users and then get the first user by id
-#    Given path 'users'
-#    When method get
-#    Then status 200
-#
-#    * def first = response[0]
-#
-#    Given path 'users', first.id
-#    When method get
-#    Then status 200
-#
-#  Scenario: create a user and then get it by id
-#    * def user =
-#      """
-#      {
-#        "name": "Test User",
-#        "username": "testuser",
-#        "email": "test@user.com",
-#        "address": {
-#          "street": "Has No Name",
-#          "suite": "Apt. 123",
-#          "city": "Electri",
-#          "zipcode": "54321-6789"
-#        }
-#      }
-#      """
-#
-#    Given url 'https://jsonplaceholder.typicode.com/users'
-#    And request user
-#    When method post
-#    Then status 201
-#
-#    * def id = response.id
-#    * print 'created id is: ', id
+  Scenario: Should able to update the nested entity without osid
+    * print mobile, password
+    Given path "api/v1/Student/invite"
+    And request student
+    When method post
+    Then status 200
+    And match response.params.status == "SUCCESSFUL"
 
-#    Given path id
-#     When method get
-#     Then status 200
-#     And match response contains user
-  
+    * def studentOsid = response.result.Student.osid
+    * def sleep = function(millis){ java.lang.Thread.sleep(millis) }
+    * sleep(1000)
+
+   * string formRequest = "grant_type=password&client_id=registry-frontend&username=" + mobile + "&password="+password
+    Given url authUrl
+    Given path "auth/realms/ndear/protocol/openid-connect/token"
+    And header Content-Type = "application/x-www-form-urlencoded"
+    And request formRequest
+
+    When method post
+    Then status 200
+
+    * string accessToken = 'Bearer ' + response.access_token
+    * print 'the value of accessToken is:', accessToken
+
+    Given url registryUrl
+    Given path "api/v1/Student"
+    And header Authorization = accessToken
+    When method get
+    Then status 200
+
+    * string contactOsid = response[0].contactDetails.osid
+    * def updateRequestBody = read('updateRequestBody.json')
+
+    Given url registryUrl
+    Given path "api/v1/Student/" + studentOsid
+    And header Authorization = accessToken
+    And request updateRequestBody
+    When method put
+    Then status 200
+    And match response.params.status == "SUCCESSFUL"
+
+    Given url registryUrl
+    Given path "api/v1/Student"
+    And header Authorization = accessToken
+    When method get
+    Then status 200
+    And match response[0].identityDetails.fullName == "Peter Parker"
+    And match response[0].identityDetails.identityHolder.value == "456456"
+    And match response[0].guardianDetails.fullName == "Tony Stark"
+    * print response

@@ -1,0 +1,33 @@
+{
+  "contactDetails": {
+    "osid": "#(contactOsid)",
+    "mobile": "#(mobile)",
+    "email": "peter@sahaj.ai",
+    "address": {
+      "pincode": "200002",
+      "plot": "ok",
+      "street": "",
+      "district": "",
+      "locality": "",
+      "state": "Karnataka",
+      "landmark": "",
+      "village": "yeah"
+    }
+  },
+  "osid": "#(studentOsid)",
+  "osOwner": [
+    "56c23cec-038e-46c0-999f-a62820606115"
+  ],
+  "identityDetails": {
+    "identityHolder": {
+      "type": "AADHAR",
+      "value": "456456"
+    },
+    "fullName": "Peter Parker"
+  },
+  "guardianDetails": {
+    "fullName": "Tony Stark",
+    "email": "tony@gmail.com",
+    "relation": "Uncle"
+  }
+}

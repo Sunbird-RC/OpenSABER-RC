@@ -21,19 +21,28 @@ services:
   db:
     image: postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_DB=registry
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
   registry:
     image: dockerhub/opensaber-rc
+    volumes:
+    - ${PWD}/java/registry/src/main/resources/public/_schemas:/home/opensaber/config/public/_schemas
+
     environment:
       - connectionInfo_uri=jdbc:postgresql://db:5432/registry
       - connectionInfo_username=postgres
       - connectionInfo_password=postgres
       - elastic_search_connection_url=es:9200
       - search_provider=io.opensaber.registry.service.ElasticSearchService
+      - sunbird_sso_realm=ndear
+      - sunbird_sso_url=http://localhost:9990/auth
+      - sunbird_sso_admin_client_id=admin-api
+      - sunbird_sso_client_id=registry-frontend
+      - sunbird_sso_admin_client_secret=0358fa30-6014-4192-9551-7c61b15b774c
+      - claims_url=http://claim-ms:8082
     ports:
       - "8081:8081"
     depends_on:
@@ -43,6 +52,8 @@ services:
         condition: service_started
   keycloak:
     image: dockerhub/keycloak
+    volumes:
+    - ${PWD}/imports:/opt/jboss/keycloak/imports
     environment:
       - DB_VENDOR=postgres
       - DB_ADDR=db
@@ -52,6 +63,7 @@ services:
       - DB_PASSWORD=postgres
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin
+      - KEYCLOAK_IMPORT=/opt/jboss/keycloak/imports/realm-export.json
     healthcheck:
       test:
         ["CMD-SHELL", "curl -f http://localhost:9990/ || exit 1"]
