@@ -10,6 +10,8 @@ services:
       - VAULT_ADDR=http://0.0.0.0:8200
       - VAULT_API_ADDR=http://0.0.0.0:8200
       - VAULT_ADDRESS=http://0.0.0.0:8200
+      - ANCHOR_TO_CORD=false
+      - ISSUER_AGENT_BASE_URL=
     cap_add:
       - IPC_LOCK
     command: vault server -config=/vault/config/vault.json
@@ -59,6 +61,9 @@ services:
       JWKS_URI: 
       ENABLE_AUTH: "false"
       WEB_DID_BASE_URL: 
+      ANCHOR_TO_CORD: "false"
+      ISSUER_AGENT_BASE_URL : 
+
     healthcheck:
       test:
         [ "CMD-SHELL", "curl -f http://localhost:3332/health || exit 1" ]

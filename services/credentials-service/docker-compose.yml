@@ -27,6 +27,9 @@ services:
       SCHEMA_BASE_URL: 
       ENABLE_AUTH: "false"
       JWKS_URI: ""
+      ANCHOR_TO_CORD: "${ANCHOR_TO_CORD}"
+      ISSUER_AGENT_BASE_URL: "${ISSUER_AGENT_BASE_URL}"
+      VERIFICATION_MIDDLEWARE_BASE_URL: "${VERIFICATION_MIDDLEWARE_BASE_URL}"
     healthcheck:
       test:
         [ "CMD-SHELL", "curl -f http://localhost:3000/health || exit 1" ]

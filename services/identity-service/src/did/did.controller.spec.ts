@@ -38,6 +38,7 @@ describe('DidController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [DidController],
+      // providers: [DidService, PrismaService, ConfigService, VaultService,AnchorCordService]
       providers: [DidService, PrismaService, ConfigService, VaultService]
     }).compile();
 
